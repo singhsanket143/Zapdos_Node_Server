@@ -18,9 +18,17 @@ app.use(express.static(publicPath));
 io.on('connection', (socket) => {
     console.log("New user connected");
 
+    socket.on('overspeeding', (response) => {
+    	console.log('overspeeding detected');
+    	console.log(response);
+    	// socket.emit('action_on_overspeed');
+
+    });
+
     socket.on('disconnect', () => {
         console.log("User disconnected");
     });
+
 });
 
 

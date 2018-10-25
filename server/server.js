@@ -14,6 +14,7 @@ var pythonPort = 5000;
 var serverAddress = 'localhost';
 
 app.use(express.static(publicPath));
+app.set("view engine","ejs");
 
 io.on('connection', (socket) => {
     console.log("New user connected");
@@ -31,7 +32,9 @@ io.on('connection', (socket) => {
 
 });
 
-
+app.get('/', (req, res) => {
+	res.render("index");
+});
 
 server.listen(port, () => {
     console.log(`Server is up on ${port}`);

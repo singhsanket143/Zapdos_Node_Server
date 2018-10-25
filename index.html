@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  <title>mapbox controllable moving marker</title>
+  
+  
+</head>
+
+<body>
+
+  <html>
+<head>
+    <meta charset='utf-8' />
+    <title></title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.12.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.12.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+<div id='map'></div>
+<script>
+  
+mapboxgl.accessToken = 'pk.eyJ1IjoiYmVlcHRjIiwiYSI6ImNpaDZzeTl6czA3cm11MWtpcmZjODhsMHAifQ.oZ9PBLwvwcMX7fBaHGDnAg';
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/satellite-hybrid-v8',
+    center: [-86.155231, 39.768458],
+    zoom: 6
+});
+
+var direction = 0, manual = false, speed = 0.01, direction2 = 0, speed2 = 0.01;
+
+// create a GeoJSON point to serve as a starting point
+var point = {
+  "type": "Point",
+  "coordinates": [76.779037, 30.733351]
+};
+
+var over_speed_point = {
+    "type": "Point",
+    "coordinates": [76.769030, 30.733351]
+}
+
+// add the GeoJSON above to a new vector tile source
+var source1 = new mapboxgl.GeoJSONSource({
+    data: point
+});
+
+var source2 = new mapboxgl.GeoJSONSource({
+    data: over_speed_point
+});
+
+function setPosition() {
+    point.coordinates[0] += speed * Math.sin(direction) / 100;
+    point.coordinates[1] += speed * Math.cos(direction) / 100;
+    source1.setData(point);
+
+    map.setLayoutProperty('drone', 'icon', direction * (180 / Math.PI));
+
+    if (!manual && Math.random() > 0.95) {
+        direction += (Math.random() - 0.5) / 2;
+    }
+
+    map.setCenter(point.coordinates);
+}
+
+function setPosition_overspeed() {
+    // spe//ed = 0.01;
+    over_speed_point.coordinates[0] += speed2 * Math.sin(direction2) / 100;
+    over_speed_point.coordinates[1] += speed2 * Math.cos(direction2) / 100;
+    source2.setData(over_speed_point);
+
+    map.setLayoutProperty('drone1', 'icon', direction2 * (180 / Math.PI));
+
+    if (!manual && Math.random() > 0.95) {
+        direction2 += (Math.random() - 0.5) / 2;
+    }
+
+    // map.setCenter(over_speed_point.coordinates);
+}
+
+map.on('style.load', function () {
+    map.addSource('drone', source1);
+    // map.addSource('drone', source2);
+    
+    map.addLayer({
+        "id": "drone-glow-strong",
+        "type": "circle",
+        "source": "drone",
+        "paint": {
+            "circle-radius": 18,
+            "circle-color": "#00e673",
+            "circle-opacity": .8
+        }
+    });
+
+    map.addLayer({
+        "id": "drone-glow",
+        "type": "circle",
+        "source": "drone",
+        "paint": {
+            "circle-radius": 40,
+            "circle-color": "#99ffcc",
+            "circle-opacity": 0.4
+        }
+    });
+  
+    // Full icon list: https://www.mapbox.com/maki
+    map.addLayer({
+        "id": "drone",
+        "type": "symbol",
+        "source": "drone",
+        "layout": {
+            "icon-image": "airport-24",  // try: 'car-24', 'airport-24', 'zoo-24'
+        }
+    });
+    
+    window.setInterval(setPosition, 10);
+});
+
+map.on('style.load', function () {
+    map.addSource('drone1', source2);
+    // map.addSource('drone', source2);
+    
+    map.addLayer({
+        "id": "drone-glow-strong1",
+        "type": "circle",
+        "source": "drone1",
+        "paint": {
+            "circle-radius": 18,
+            "circle-color": "#f2989d",
+            "circle-opacity": .8
+        }
+    });
+
+    map.addLayer({
+        "id": "drone-glow1",
+        "type": "circle",
+        "source": "drone1",
+        "paint": {
+            "circle-radius": 40,
+            "circle-color": "#d11822",
+            "circle-opacity": 0.4
+        }
+    });
+  
+    // Full icon list: https://www.mapbox.com/maki
+    map.addLayer({
+        "id": "drone1",
+        "type": "symbol",
+        "source": "drone1",
+        "layout": {
+            "icon-image": "car-24",  // try: 'car-24', 'airport-24', 'zoo-24'
+        }
+    });
+    
+    window.setInterval(setPosition_overspeed, 10);
+});
+
+// Add manual control of the airplane with left and right arrow keys, just because
+document.body.addEventListener('keydown', function (e) {
+    if (e.which == 37) { // left
+        direction -= 0.1;
+        manual = true;
+    }
+    if (e.which == 39) { // right
+        direction += 0.1;
+        manual = true;
+    }
+    if (e.which == 38) { // faster
+        speed = Math.min(speed + 0.1, 10);
+        manual = true;
+        e.preventDefault();
+    }
+    if (e.which == 40) { // slower
+        speed = Math.max(speed - 0.1, 0);
+        manual = true;
+        e.preventDefault();
+    }
+}, true);
+document.body.addEventListener('keydown', function (e) {
+    if (e.which == 65) { // left
+        direction2 -= 0.1;
+        manual = true;
+    }
+    if (e.which == 68) { // right
+        direction2 += 0.1;
+        manual = true;
+    }
+    if (e.which == 87) { // faster
+        speed2 = Math.min(speed2 + 0.1, 10);
+        manual = true;
+        e.preventDefault();
+    }
+    if (e.which == 83) { // slower
+        speed2 = Math.max(speed2 - 0.1, 0);
+        manual = true;
+        e.preventDefault();
+    }
+}, true);
+</script>
+
+</body>
+</html>
+  
+  
+
+</body>
+
+</html>

@@ -42,7 +42,11 @@
 <div class='overlay'>
     <button id='replay'>Replay</button>
 </div>
-
+<script src="/socket.io/socket.io.js"></script>
+<script
+  src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
 <script>
 
 var direction = 0, manual = false, speed = 0.01, direction2 = 0, speed2 = 2;
@@ -115,7 +119,7 @@ function setPosition_overspeed() {
     var dist = Math.sqrt(Math.abs((x*x)-(y*y)));
     console.log(dist);
      if(dist < 0.2) {
-        console.log("Gone");
+        // console.log("Gone");
         // direction+=1;
         var msg = new SpeechSynthesisUtterance('Hello World');
         window.speechSynthesis.speak(msg);

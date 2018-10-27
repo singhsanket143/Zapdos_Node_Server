@@ -103,6 +103,10 @@ var source2 = new mapboxgl.GeoJSONSource({
     data: over_speed_point
 });
 
+
+var warning_count=0;
+
+
 function setPosition_overspeed() {
     // spe//ed = 0.01;
     over_speed_point.coordinates[0] += speed2 * Math.cos(direction2) / 100;
@@ -117,12 +121,15 @@ function setPosition_overspeed() {
     var x = over_speed_point.coordinates[0] - point["features"][0]["geometry"].coordinates[0];
     var y = over_speed_point.coordinates[1] - point["features"][0]["geometry"].coordinates[1];
     var dist = Math.sqrt(Math.abs((x*x)-(y*y)));
-    console.log(dist);
-     if(dist < 0.2) {
-        // console.log("Gone");
+    console.log(warning_count);
+     if(dist < 0.2 && warning_count%2==0) {
+        console.log("Gone");
         // direction+=1;
-        var msg = new SpeechSynthesisUtterance('Hello World');
+        var msg = new SpeechSynthesisUtterance('Warning');
         window.speechSynthesis.speak(msg);
+        warning_count = 1;
+     } else {
+        warning_count = 0;
      }
     // map.setCenter(over_speed_point.coordinates);
 }
